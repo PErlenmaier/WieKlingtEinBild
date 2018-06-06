@@ -19,8 +19,11 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.Popup;
+import javax.swing.JOptionPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import wieklingteinbild.controller.PictureDirectory;
@@ -34,6 +37,11 @@ import static wieklingteinbild.model.SoundListe.soundListe;
  * @author Philipp // Max
  */
 public class FrmHauptfenster extends javax.swing.JFrame {
+
+    String advSettings1;
+    String advSettings2;
+    String advSettings3;
+    String advSettings4 = "0";
     /**
      * Creates new form FrmHauptfenster
      */
@@ -89,8 +97,8 @@ public class FrmHauptfenster extends javax.swing.JFrame {
             model.addRow(row);
         }
     }
-    
-        public void addSoundName() {
+
+    public void addSoundName() {
         SoundDirectory soundDir = new SoundDirectory();
         soundDir.addSoundsFromDir();
         DefaultTableModel model = (DefaultTableModel) jTable_sound.getModel();
@@ -106,6 +114,74 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     public void clearTable() {
         DefaultTableModel model = (DefaultTableModel) jTable_images.getModel();
         model.setRowCount(0);
+    }
+
+    public void clearSoundTable() {
+        DefaultTableModel model = (DefaultTableModel) jTable_sound.getModel();
+        model.setRowCount(0);
+    }
+
+    public void generateSound() {
+
+        int freq = jSliderFrequency.getValue();
+        String stringFreq = Integer.toString(freq);
+
+        int volume = jSliderVolume.getValue();
+        String stringVolume = Integer.toString(volume);
+
+        int samples = jSliderSamples.getValue();
+        String stringSamples = Integer.toString(samples);
+
+        String wavName = jTextFieldSoundName.getText();
+        if (wavName.isEmpty()) {
+            wavName = "Test.wav";
+        }
+
+        int row = jTable_images.getSelectedRow();
+
+        try {
+
+            ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/C", "start",
+                    PictureDirectory.getPictureDir() + "\\WieKlingtEinBild.exe",
+                    PictureDirectory.getPictureDir() + "\\" + jTable_images.getValueAt(row, 0).toString(),
+                    PictureDirectory.getPictureDir() + wavName,
+                    stringFreq,
+                    stringVolume,
+                    stringSamples,
+                    "0", "12000", "180", "5",
+                    advSettings4);
+            pb.start();
+
+        } catch (IOException ex) {
+            Logger.getLogger(FrmHauptfenster.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    public boolean generateButtonControl() {
+        ListSelectionModel listSelectionModel = jTable_images.getSelectionModel();
+        if (listSelectionModel.isSelectionEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean playButtonControl() {
+        ListSelectionModel listSelectionModel = jTable_sound.getSelectionModel();
+        if (listSelectionModel.isSelectionEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean setRadioButton() {
+        if (jRadioButtonInvers.isSelected()) {
+            jTextFieldPixelInvers.setText("Pixel invertiert");
+            return true;
+        } else {
+            jTextFieldPixelInvers.setText("Pixel nicht invertiert");
+            return false;
+        }
     }
 
     /**
@@ -124,7 +200,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         jLabel_image = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        jTextFieldSoundName = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabSliderValue = new javax.swing.JLabel();
@@ -143,10 +219,16 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         jToggleButtonGenerate = new javax.swing.JToggleButton();
         jButtonPlay = new javax.swing.JButton();
         AlgoComboBox = new javax.swing.JComboBox<>();
+        jPanelGrundeinstellungen = new javax.swing.JLabel();
+        jRadioButtonInvers = new javax.swing.JRadioButton();
+        jTextFieldPixelInvers = new javax.swing.JTextField();
+        jButtonGenerate = new javax.swing.JButton();
         jButtonPrevious = new javax.swing.JButton();
         jButtonNext = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable_sound = new javax.swing.JTable();
+        jButtonUpdateSoundListe = new javax.swing.JButton();
+        jButtonPlay = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenuFile = new javax.swing.JMenu();
         jMenuItemExit = new javax.swing.JMenuItem();
@@ -252,13 +334,16 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         jLabel8.setText("88200");
 
         jLabSamples.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jLabSamples.setText("124");
+        jLabSamples.setText("128");
 
         jLabel6.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel6.setText("Samples");
 
-        jSliderSamples.setMinorTickSpacing(10);
+        jSliderSamples.setMaximum(2048);
+        jSliderSamples.setMinimum(128);
+        jSliderSamples.setMinorTickSpacing(200);
         jSliderSamples.setPaintTicks(true);
+        jSliderSamples.setValue(128);
         jSliderSamples.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             public void mouseMoved(java.awt.event.MouseEvent evt) {
                 jSliderSamplesMouseMoved(evt);
@@ -267,19 +352,23 @@ public class FrmHauptfenster extends javax.swing.JFrame {
 
         jLabel9.setText("0");
 
-        jLabel10.setText("200");
+        jLabel10.setText("2048");
 
-        jToggleButtonGenerate.setText("Generate");
-        jToggleButtonGenerate.addActionListener(new java.awt.event.ActionListener() {
+        jPanelGrundeinstellungen.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jPanelGrundeinstellungen.setText("Grundeinstellungen");
+
+        jRadioButtonInvers.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jToggleButtonGenerateActionPerformed(evt);
+                jRadioButtonInversActionPerformed(evt);
             }
         });
 
-        jButtonPlay.setText("Play");
-        jButtonPlay.addActionListener(new java.awt.event.ActionListener() {
+        jTextFieldPixelInvers.setText("Pixel nicht invertiert");
+
+        jButtonGenerate.setText("Generate");
+        jButtonGenerate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonPlayActionPerformed(evt);
+                jButtonGenerateActionPerformed(evt);
             }
         });
 
@@ -337,6 +426,45 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                                 .addComponent(jSliderSamples, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(AlgoComboBox, javax.swing.GroupLayout.Alignment.LEADING, 0, 271, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSliderFrequency, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jTextFieldSoundName)
+                    .addComponent(jButtonGenerate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jSliderSamples, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel10))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabSamples))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel8))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabFrequency))
+                    .addComponent(jSliderVolume, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel4))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1)
+                            .addComponent(jPanelGrundeinstellungen)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jRadioButtonInvers)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTextFieldPixelInvers, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 19, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabSliderValue)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -349,6 +477,10 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(AlgoComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(30, 30, 30)
+                .addComponent(jTextFieldSoundName, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(40, 40, 40)
+                .addComponent(jPanelGrundeinstellungen)
+                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(jLabSliderValue))
@@ -359,14 +491,13 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                     .addComponent(jLabel3)
                     .addComponent(jLabel4))
                 .addGap(59, 59, 59)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel5)
-                        .addGap(18, 18, 18)
-                        .addComponent(jSliderFrequency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
                     .addComponent(jLabFrequency))
+                .addGap(18, 18, 18)
+                .addComponent(jSliderFrequency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(jLabel8))
                 .addGap(58, 58, 58)
@@ -379,11 +510,13 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
                     .addComponent(jLabel10))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jToggleButtonGenerate, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonPlay, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(25, 25, 25))
+                .addGap(30, 30, 30)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jRadioButtonInvers, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jTextFieldPixelInvers))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 136, Short.MAX_VALUE)
+                .addComponent(jButtonGenerate, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         jButtonPrevious.setIcon(new javax.swing.ImageIcon(getClass().getResource("/wieklingteinbild/icons/Previous-32.png"))); // NOI18N
@@ -411,6 +544,21 @@ public class FrmHauptfenster extends javax.swing.JFrame {
             }
         ));
         jScrollPane2.setViewportView(jTable_sound);
+
+        jButtonUpdateSoundListe.setIcon(new javax.swing.ImageIcon(getClass().getResource("/wieklingteinbild/icons/update_32.png"))); // NOI18N
+        jButtonUpdateSoundListe.setText("Update");
+        jButtonUpdateSoundListe.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonUpdateSoundListeActionPerformed(evt);
+            }
+        });
+
+        jButtonPlay.setText("Play");
+        jButtonPlay.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonPlayActionPerformed(evt);
+            }
+        });
 
         jMenuFile.setText("File");
         jMenuFile.addActionListener(new java.awt.event.ActionListener() {
@@ -446,6 +594,13 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                         .addComponent(jButtonNext, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel_image, javax.swing.GroupLayout.DEFAULT_SIZE, 683, Short.MAX_VALUE)
+                        .addComponent(jButtonNext, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButtonUpdateSoundListe, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButtonPlay, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel_image, javax.swing.GroupLayout.DEFAULT_SIZE, 732, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -468,6 +623,22 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButtonNext, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButtonPrevious, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 343, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButtonUpdateSoundListe, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButtonPlay, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 22, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addGap(38, 38, 38))
         );
 
         pack();
@@ -550,6 +721,21 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         //Added update of sound dir
         SoundDirectory.updateSoundDir();
     }//GEN-LAST:event_jToggleButtonGenerateActionPerformed
+        if (playButtonControl() == true) {
+
+            TableModel model = jTable_sound.getModel();
+            String soundName = model.getValueAt(jTable_sound.getSelectedRow(), 0).toString();
+            File datei = new File(SoundDirectory.getSoundDir() + "\\" + soundName);
+            try {
+                AudioClip clip = Applet.newAudioClip(datei.toURL());
+                clip.play();
+            } catch (MalformedURLException ex) {
+                Logger.getLogger(FrmHauptfenster.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Please select a sound!", "Alert", 2);
+        }
+    }//GEN-LAST:event_jButtonPlayActionPerformed
 
     private void jButtonNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNextActionPerformed
 
@@ -606,7 +792,36 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     private void jMenuFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuFileActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jMenuFileActionPerformed
+    private void jButtonUpdateSoundListeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonUpdateSoundListeActionPerformed
+        clearSoundTable();
+        soundListe.clear();
+        addSoundName();
+    }//GEN-LAST:event_jButtonUpdateSoundListeActionPerformed
 
+    private void jRadioButtonInversActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonInversActionPerformed
+        setRadioButton();
+        if (setRadioButton() == true) {
+            advSettings4 = "1";
+        } else {
+            advSettings4 = "0";
+        }
+
+
+    }//GEN-LAST:event_jRadioButtonInversActionPerformed
+
+    private void jButtonGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGenerateActionPerformed
+
+        if (generateButtonControl() == true) {
+            if (jTextFieldSoundName.getText().equals("")) {
+                JOptionPane.showMessageDialog(null, "Please type in Soundname!", "Alert", 2);
+            } else {
+                generateSound();
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Please select a picture!", "Alert", 2);
+        }
+        System.out.println(advSettings4);
+    }//GEN-LAST:event_jButtonGenerateActionPerformed
     /**
      * @param args the command line arguments
      */
@@ -652,6 +867,11 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     private javax.swing.JButton jButtonPrevious;
     private javax.swing.JFrame jFrame1;
     private javax.swing.JFrame jFrame2;
+    private javax.swing.JButton jButtonGenerate;
+    private javax.swing.JButton jButtonNext;
+    private javax.swing.JButton jButtonPlay;
+    private javax.swing.JButton jButtonPrevious;
+    private javax.swing.JButton jButtonUpdateSoundListe;
     private javax.swing.JLabel jLabFrequency;
     private javax.swing.JLabel jLabSamples;
     private javax.swing.JLabel jLabSliderValue;
@@ -670,6 +890,8 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     private javax.swing.JMenu jMenuFile;
     private javax.swing.JMenuItem jMenuItemExit;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JLabel jPanelGrundeinstellungen;
+    private javax.swing.JRadioButton jRadioButtonInvers;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSlider jSliderFrequency;
@@ -677,7 +899,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     private javax.swing.JSlider jSliderVolume;
     private javax.swing.JTable jTable_images;
     private javax.swing.JTable jTable_sound;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JToggleButton jToggleButtonGenerate;
+    private javax.swing.JTextField jTextFieldPixelInvers;
+    private javax.swing.JTextField jTextFieldSoundName;
     // End of variables declaration//GEN-END:variables
 }
