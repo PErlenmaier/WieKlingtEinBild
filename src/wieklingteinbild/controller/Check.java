@@ -18,4 +18,12 @@ public class Check {
         }
         return istOK;
     }
+    
+        public static boolean checkWavType(String type) {
+        boolean istOK = false;
+        if (type.endsWith(".wav")) {
+            istOK = true;
+        }
+        return istOK;
+    }
 }

@@ -18,6 +18,7 @@ public class WieKlingtEinBild {
      */
     public static void main(String[] args) {
         PictureDirectory.updatePictureDir();
+        SoundDirectory.updateSoundDir();
         FrmHauptfenster frmHauptfenster = new FrmHauptfenster();
         frmHauptfenster.setVisible(true);
     }
