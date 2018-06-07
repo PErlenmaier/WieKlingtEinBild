@@ -22,6 +22,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
+import wieklingteinbild.controller.Check;
 import wieklingteinbild.controller.PictureDirectory;
 import wieklingteinbild.controller.SoundDirectory;
 import wieklingteinbild.model.Picture;
@@ -38,6 +39,8 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     String advSettings2;
     String advSettings3;
     String advSettings4 = "0";
+    
+    private AudioClip audioClip;
     
     private String algoInfoMessage = "";
     
@@ -276,6 +279,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         jTable_sound = new javax.swing.JTable();
         jButtonUpdateSoundListe = new javax.swing.JButton();
         jButtonPlay = new javax.swing.JButton();
+        jButtonPause = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenuFile = new javax.swing.JMenu();
         jMenuItemExit = new javax.swing.JMenuItem();
@@ -543,6 +547,13 @@ public class FrmHauptfenster extends javax.swing.JFrame {
             }
         });
 
+        jButtonPause.setText("Stop");
+        jButtonPause.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonPauseActionPerformed(evt);
+            }
+        });
+
         jMenuFile.setText("File");
 
         jMenuItemExit.setText("Exit");
@@ -570,10 +581,12 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                         .addComponent(jButtonPrevious, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButtonNext, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jButtonUpdateSoundListe, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButtonPlay, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jButtonPause, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
+                            .addComponent(jButtonPlay, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel_image, javax.swing.GroupLayout.DEFAULT_SIZE, 729, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -586,22 +599,24 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel_image, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jButtonNext, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButtonPrevious, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 343, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jButtonUpdateSoundListe, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButtonPlay, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 49, Short.MAX_VALUE)))
                 .addGap(38, 38, 38))
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonNext, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonPrevious, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 343, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonUpdateSoundListe, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonPlay, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(1, 1, 1)
+                .addComponent(jButtonPause, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 16, Short.MAX_VALUE))
         );
 
         pack();
@@ -640,8 +655,8 @@ public class FrmHauptfenster extends javax.swing.JFrame {
             String soundName = model.getValueAt(jTable_sound.getSelectedRow(), 0).toString();
             File datei = new File(SoundDirectory.getSoundDir() + "\\" + soundName);
             try {
-                AudioClip clip = Applet.newAudioClip(datei.toURL());
-                clip.play();
+                audioClip = Applet.newAudioClip(datei.toURL());
+                audioClip.play();
             } catch (MalformedURLException ex) {
                 Logger.getLogger(FrmHauptfenster.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -693,6 +708,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
 
     private void jButtonGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGenerateActionPerformed
 
+        if(Check.checkWavType(jTextFieldSoundName.getText()) == true){
         if (generateButtonControl() == true) {
             if (jTextFieldSoundName.getText().equals("")) {
                 JOptionPane.showMessageDialog(null, "Please type in Soundname!", "Alert", 2);
@@ -703,6 +719,9 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         } else {
             JOptionPane.showMessageDialog(null, "Please select a picture!", "Alert", 2);
         }
+        }else{
+            JOptionPane.showMessageDialog(null, "Sound name .wav!", "Alert", 2);
+        }
         System.out.println(advSettings4);
         System.out.println(selectedAlgorithmus);
     }//GEN-LAST:event_jButtonGenerateActionPerformed
@@ -711,6 +730,10 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         setAlgorithmus();
         JOptionPane.showMessageDialog(null, algoInfoMessage, jComboBoxAlgorithmus.getSelectedItem().toString(), 3);
     }//GEN-LAST:event_jButtonAlgoInfoActionPerformed
+
+    private void jButtonPauseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPauseActionPerformed
+        audioClip.stop();
+    }//GEN-LAST:event_jButtonPauseActionPerformed
 
     /**
      * @param args the command line arguments
@@ -754,6 +777,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     private javax.swing.JButton jButtonAlgoInfo;
     private javax.swing.JButton jButtonGenerate;
     private javax.swing.JButton jButtonNext;
+    private javax.swing.JButton jButtonPause;
     private javax.swing.JButton jButtonPlay;
     private javax.swing.JButton jButtonPrevious;
     private javax.swing.JButton jButtonUpdateSoundListe;
