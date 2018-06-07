@@ -38,6 +38,28 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     String advSettings2;
     String advSettings3;
     String advSettings4 = "0";
+    
+    private String algoInfoMessage = "";
+    
+    private int selectedAlgorithmus = 0;
+
+    private String beschreibungLR_SCAN = "Bild wird von Links nach Rechts spaltenweise durchgescannt. Jede Zeile steht fuer eine Frequenz. Je intensiver R ←-\n"
+            + "GB vom Pixel desto hoeher die Amplitude der jeweiligen Frequenz. Pixel werden nur betrachtet, wenn der Durschnitt\n"
+            + "von RGB > Aktivierungsschwelle ist.";
+    private String beschreibungLR_SCAN_NO_THRESHOLD = "Bild wird von Links nach Rechts spaltenweise durchgescannt. Jede Zeile steht fuer eine Frequenz. Je intensiver\n"
+            + "RGB vom Pixel desto hoeher die Amplitude der jeweiligen Frequenz. Keine Aktivierungsgrenze.";
+    private String beschreibungUD_SCAN = "Bild wird von Oben nach Unten zweilenweise durchgescannt. Jede Spalte steht fuer eine Frequenz. Je intensiver RGB vom Pixel desto hoeher die Amplitude der jeweiligen Frequenz. Pixel werden nur betrachtet, wenn der\n"
+            + "Durschnitt von RGB > Aktivierungsschwelle ist.";
+    private String beschreibungUD_SCAN_NO_THRESHOLD = "Bild wird von Oben nach Unten zweilenweise durchgescannt. Jede Spalte steht fuer eine Frequenz. Je intensiver\n"
+            + "RGB vom Pixel desto hoeher die Amplitude der jeweiligen Frequenz. Keine Aktivierungsschwelle.";
+    private String beschreibungTRIPLET = "Bild wird immer um 3 Byte (Triplet) oder Vielfache durchgesprungen. Jede Farbe hat eine Eigenschaft bei der\n"
+            + "Tonerzeugung Rot: Lautstaerke ; Gruen: Tonhoehe; Blau: Tondauer.";
+    private String beschreibungTRIPLET_JMP = "Bild wird mit einem Offset abhaengig von der Farbe durchgesprungen Rot: Lautstarke, Gruen: Tonhoehe; Blau:\n"
+            + "keine Funktion.";
+    private String beschreibungUD_LR_SCAN = "Das Bild wird von oben nach unten und von links nach rechts gleichzeitig gescannt. Die Senkrechte zur X-Achse\n"
+            + "und die Parallele erzeugen beide jeweils einen Ton. Jeder Ton wird abhaengig von jeweiligen Farbanteil erzeugt.\n"
+            + "Rot bestimmt die Frequenz, Gruen bestimmt die Lautstaerke und der gemeinsame Blauanteil die Dauer der beiden\n"
+            + "Frequenzen.";
 
     /**
      * Creates new form FrmHauptfenster
@@ -143,7 +165,8 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                     stringFreq,
                     stringVolume,
                     stringSamples,
-                    "0", "12000", "180", "5",
+                    Integer.toString(selectedAlgorithmus),
+                    "12000", "180", "5",
                     advSettings4);
             pb.start();
 
@@ -178,6 +201,38 @@ public class FrmHauptfenster extends javax.swing.JFrame {
             return false;
         }
     }
+    
+    public void setAlgorithmus(){
+        algoInfoMessage ="";
+        String selectedAlgo = jComboBoxAlgorithmus.getSelectedItem().toString();
+        
+        if(selectedAlgo.equals("LR_SCAN")){
+            selectedAlgorithmus = 0;
+            algoInfoMessage = beschreibungLR_SCAN;
+        }else if(selectedAlgo.equals("LR_SCAN_NO_THRESHOLD")){
+            selectedAlgorithmus = 1;
+            algoInfoMessage = beschreibungLR_SCAN_NO_THRESHOLD;
+        }else if(selectedAlgo.equals("TRIPLET")){
+            selectedAlgorithmus = 4;
+            algoInfoMessage = beschreibungTRIPLET;
+        }else if(selectedAlgo.equals("TRIPLET_JMP")){
+            selectedAlgorithmus = 5;
+            algoInfoMessage = beschreibungTRIPLET_JMP;
+        }else if(selectedAlgo.equals("UD_LR_SCAN")){
+            selectedAlgorithmus = 6;
+            algoInfoMessage = beschreibungUD_LR_SCAN;
+        }else if(selectedAlgo.equals("UD_SCAN")){
+            selectedAlgorithmus = 2;
+            algoInfoMessage = beschreibungUD_SCAN;
+        }else if(selectedAlgo.equals("UD_SCAN_NO_THRESHOLD")){
+            selectedAlgorithmus = 3;
+            algoInfoMessage = beschreibungUD_SCAN_NO_THRESHOLD;
+        }else{
+            algoInfoMessage = "No Algo set";
+            selectedAlgorithmus = 0;
+        }
+        
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -209,10 +264,12 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         jSliderSamples = new javax.swing.JSlider();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
-        jPanelGrundeinstellungen = new javax.swing.JLabel();
         jRadioButtonInvers = new javax.swing.JRadioButton();
         jTextFieldPixelInvers = new javax.swing.JTextField();
         jButtonGenerate = new javax.swing.JButton();
+        jComboBoxAlgorithmus = new javax.swing.JComboBox<>();
+        jLabelAlgorithmus = new javax.swing.JLabel();
+        jButtonAlgoInfo = new javax.swing.JButton();
         jButtonPrevious = new javax.swing.JButton();
         jButtonNext = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -305,7 +362,6 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         jSliderSamples.setMinimum(128);
         jSliderSamples.setMinorTickSpacing(200);
         jSliderSamples.setPaintTicks(true);
-        jSliderSamples.setValue(128);
         jSliderSamples.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             public void mouseMoved(java.awt.event.MouseEvent evt) {
                 jSliderSamplesMouseMoved(evt);
@@ -315,9 +371,6 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         jLabel9.setText("0");
 
         jLabel10.setText("2048");
-
-        jPanelGrundeinstellungen.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jPanelGrundeinstellungen.setText("Grundeinstellungen");
 
         jRadioButtonInvers.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -334,6 +387,18 @@ public class FrmHauptfenster extends javax.swing.JFrame {
             }
         });
 
+        jComboBoxAlgorithmus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "LR_SCAN", "LR_SCAN_NO_THRESHOLD", "UD_SCAN", "UD_SCAN_NO_THRESHOLD", "TRIPLET", "TRIPLET_JMP", "UD_LR_SCAN" }));
+
+        jLabelAlgorithmus.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabelAlgorithmus.setText("Algorithmus");
+
+        jButtonAlgoInfo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/wieklingteinbild/icons/Fragezeichen_24.png"))); // NOI18N
+        jButtonAlgoInfo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonAlgoInfoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -341,9 +406,9 @@ public class FrmHauptfenster extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSliderFrequency, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jTextFieldSoundName)
                     .addComponent(jButtonGenerate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jSliderFrequency, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jSliderSamples, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel9)
@@ -367,18 +432,22 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel4))
                     .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabSliderValue))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addComponent(jComboBoxAlgorithmus, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButtonAlgoInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(jLabel1)
-                            .addComponent(jPanelGrundeinstellungen)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jRadioButtonInvers)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTextFieldPixelInvers, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 19, Short.MAX_VALUE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabSliderValue)))
+                                .addComponent(jTextFieldPixelInvers, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabelAlgorithmus))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -388,9 +457,13 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jTextFieldSoundName, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(40, 40, 40)
-                .addComponent(jPanelGrundeinstellungen)
-                .addGap(18, 18, 18)
+                .addGap(25, 25, 25)
+                .addComponent(jLabelAlgorithmus)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jComboBoxAlgorithmus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonAlgoInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(50, 50, 50)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(jLabSliderValue))
@@ -400,7 +473,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(jLabel4))
-                .addGap(59, 59, 59)
+                .addGap(50, 50, 50)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(jLabFrequency))
@@ -410,7 +483,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(jLabel8))
-                .addGap(58, 58, 58)
+                .addGap(50, 50, 50)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
                     .addComponent(jLabSamples))
@@ -420,11 +493,11 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
                     .addComponent(jLabel10))
-                .addGap(30, 30, 30)
+                .addGap(50, 50, 50)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jRadioButtonInvers, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jTextFieldPixelInvers))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 136, Short.MAX_VALUE)
+                    .addComponent(jTextFieldPixelInvers, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(80, 80, 80)
                 .addComponent(jButtonGenerate, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -502,7 +575,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButtonPlay, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel_image, javax.swing.GroupLayout.DEFAULT_SIZE, 732, Short.MAX_VALUE)
+                .addComponent(jLabel_image, javax.swing.GroupLayout.DEFAULT_SIZE, 729, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -524,7 +597,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jButtonUpdateSoundListe, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jButtonPlay, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 22, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -624,13 +697,20 @@ public class FrmHauptfenster extends javax.swing.JFrame {
             if (jTextFieldSoundName.getText().equals("")) {
                 JOptionPane.showMessageDialog(null, "Please type in Soundname!", "Alert", 2);
             } else {
+                setAlgorithmus();
                 generateSound();
             }
         } else {
             JOptionPane.showMessageDialog(null, "Please select a picture!", "Alert", 2);
         }
         System.out.println(advSettings4);
+        System.out.println(selectedAlgorithmus);
     }//GEN-LAST:event_jButtonGenerateActionPerformed
+
+    private void jButtonAlgoInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAlgoInfoActionPerformed
+        setAlgorithmus();
+        JOptionPane.showMessageDialog(null, algoInfoMessage, jComboBoxAlgorithmus.getSelectedItem().toString(), 3);
+    }//GEN-LAST:event_jButtonAlgoInfoActionPerformed
 
     /**
      * @param args the command line arguments
@@ -671,11 +751,13 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButtonAlgoInfo;
     private javax.swing.JButton jButtonGenerate;
     private javax.swing.JButton jButtonNext;
     private javax.swing.JButton jButtonPlay;
     private javax.swing.JButton jButtonPrevious;
     private javax.swing.JButton jButtonUpdateSoundListe;
+    private javax.swing.JComboBox<String> jComboBoxAlgorithmus;
     private javax.swing.JLabel jLabFrequency;
     private javax.swing.JLabel jLabSamples;
     private javax.swing.JLabel jLabSliderValue;
@@ -689,12 +771,12 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JLabel jLabelAlgorithmus;
     private javax.swing.JLabel jLabel_image;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenu jMenuFile;
     private javax.swing.JMenuItem jMenuItemExit;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JLabel jPanelGrundeinstellungen;
     private javax.swing.JRadioButton jRadioButtonInvers;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;

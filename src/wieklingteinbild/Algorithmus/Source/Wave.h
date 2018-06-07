@@ -1,45 +1,79 @@
 #pragma once
 #include <fstream>
 
-#define DEFAULT_BITS_PER_SAMPLE 16
-#define DEFAULT_BYTES_PER_SAMPLE (DEFAULT_BITS_PER_SAMPLE/8)
+static constexpr auto DEFAULT_BITS_PER_SAMPLE = 16;
+static constexpr auto DEFAULT_BYTES_PER_SAMPLE = DEFAULT_BITS_PER_SAMPLE / 8;
 
+/**
+ * \brief Klasse zur Erzeugung von .wav Audiodateien
+ */
 class Wave
 {
 private:
+	/**
+	 * \brief Bereitet Header fur Audiodatei vor
+	 */
 	void prepareHeader();
+
+	/**
+	 * \brief Outputfilestream. Genutzt um Audiodaten in Datei zu schreiben
+	 */
 	std::ofstream file{"WieKlingtEinBild.wav", std::ios::binary};
 
+	/**
+	 * \brief Header der .wav Datei 
+	 */
 	struct
 	{
 		//little endian
 		const uint32_t subChunk1Size{16}; //Keine zusaetzlichen Daten
 		const uint16_t audioFormat{1}; //Keine Kompression
-		const uint16_t numChannels{1};
-		uint32_t sampleRate{44100};
-		const uint32_t byteRate{static_cast<uint32_t>(sampleRate * numChannels * DEFAULT_BYTES_PER_SAMPLE)};
-		const uint16_t blockAlign{static_cast<uint16_t>(numChannels * DEFAULT_BYTES_PER_SAMPLE)};
-		const uint16_t bitsPerSample{DEFAULT_BITS_PER_SAMPLE};
+		const uint16_t numChannels{1}; //Anzahl der Channel (hier: 1)
+		uint32_t sampleRate{44100}; //Abtastrate 
+		const uint32_t byteRate{static_cast<uint32_t>(sampleRate * numChannels * DEFAULT_BYTES_PER_SAMPLE)}; //Abtastrate* Frame Groesse
+		const uint16_t blockAlign{static_cast<uint16_t>(numChannels * DEFAULT_BYTES_PER_SAMPLE)}; //Allignment. Hier immer gleich
+		const uint16_t bitsPerSample{DEFAULT_BITS_PER_SAMPLE}; //Bits pro Samplewert pro Kanal
 	} waveHeader;
 
 public:
+
+	/**
+	 * \brief Konstruktor
+	 * \param fileName: Dateiname der zu erzeugenden Audiodatei (.wav)
+	 * \param sampleRate: Abtastrate der Audiodatei
+	 */
 	Wave(std::string fileName, uint32_t sampleRate);
+
+	/**
+	 * \brief Standardkonstruktor
+	 */
 	Wave();
 
+	/**
+	 * \brief Schreibt Daten in Audiodatei
+	 * \tparam T Typ von Daten z.B. uint16_t
+	 * \param data Daten die geschrieben werden sollen
+	 */
 	template <typename T>
-	std::ofstream& writeSamples(T data)
+	void writeSamples(T data)
 	{
-		size_t size = sizeof(T);
+		auto size = sizeof(T);
 		while (size--)
 		{
 			file.put(static_cast<uint8_t>(data & 0xFF));
 			data >>= 8;
 		}
-
-		return file;
 	}
 
+	/**
+	 * \brief Header fertig machen. Erst nutzen wenn Audiodateien fertig beschrieben wurde.
+	 */
 	void finishHeader();
+
+	/**
+	* \brief Audiodatei schliesen
+	*/
 	void closeFile();
+
 	~Wave();
 };

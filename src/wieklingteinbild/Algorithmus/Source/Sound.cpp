@@ -26,6 +26,11 @@ void Sound::addFrequency(const double volume, const double frequency)
 		lastPos -= 2 * M_PI;
 }
 
+const std::vector<double>& Sound::getBuffer() const
+{
+	return buffer;
+}
+
 void Sound::resetBuffer()
 {
 	std::fill(buffer.begin(), buffer.end(), 0.0);
