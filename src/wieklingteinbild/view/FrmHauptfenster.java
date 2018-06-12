@@ -8,8 +8,10 @@ package wieklingteinbild.view;
 import java.applet.Applet;
 import java.applet.AudioClip;
 import java.awt.Image;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,6 +20,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -39,7 +42,6 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     String advSettings2;
     String advSettings3;
     String advSettings4 = "0";
-    
     private AudioClip audioClip;
     
     private String algoInfoMessage = "";
@@ -151,10 +153,17 @@ public class FrmHauptfenster extends javax.swing.JFrame {
 
         int samples = jSliderSamples.getValue();
         String stringSamples = Integer.toString(samples);
+        
+        int threshold = jSliderThresould.getValue();
+        String stringThreshold = Integer.toString(threshold);
 
         String wavName = jTextFieldSoundName.getText();
         if (wavName.isEmpty()) {
             wavName = "Test.wav";
+        }
+         if (wavName.endsWith(".wav") == false)
+        {
+                wavName =wavName + ".wav";
         }
 
         int row = jTable_images.getSelectedRow();
@@ -169,11 +178,24 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                     stringVolume,
                     stringSamples,
                     Integer.toString(selectedAlgorithmus),
-                    "12000", "180", "5",
+                    stringFreq, stringThreshold, "5",
                     advSettings4);
-            pb.start();
+            System.out.println(pb.redirectInput());
+            final Process p =  pb.start();
+            BufferedReader br =new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String line;
+            while((line=br.readLine())!=null)
+            {
+                System.out.println(line);
+            }
+            p.waitFor();
+            clearSoundTable();
+            soundListe.clear();
+            addSoundName();
 
         } catch (IOException ex) {
+            Logger.getLogger(FrmHauptfenster.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException ex) {
             Logger.getLogger(FrmHauptfenster.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -217,6 +239,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
             algoInfoMessage = beschreibungLR_SCAN_NO_THRESHOLD;
         }else if(selectedAlgo.equals("TRIPLET")){
             selectedAlgorithmus = 4;
+            
             algoInfoMessage = beschreibungTRIPLET;
         }else if(selectedAlgo.equals("TRIPLET_JMP")){
             selectedAlgorithmus = 5;
@@ -226,6 +249,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
             algoInfoMessage = beschreibungUD_LR_SCAN;
         }else if(selectedAlgo.equals("UD_SCAN")){
             selectedAlgorithmus = 2;
+            
             algoInfoMessage = beschreibungUD_SCAN;
         }else if(selectedAlgo.equals("UD_SCAN_NO_THRESHOLD")){
             selectedAlgorithmus = 3;
@@ -250,20 +274,16 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         jTable_images = new javax.swing.JTable();
         jLabel_image = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
         jTextFieldSoundName = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabSliderValue = new javax.swing.JLabel();
         jSliderVolume = new javax.swing.JSlider();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
         jLabFrequency = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jSliderFrequency = new javax.swing.JSlider();
         jLabel8 = new javax.swing.JLabel();
         jLabSamples = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
         jSliderSamples = new javax.swing.JSlider();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
@@ -273,11 +293,15 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         jComboBoxAlgorithmus = new javax.swing.JComboBox<>();
         jLabelAlgorithmus = new javax.swing.JLabel();
         jButtonAlgoInfo = new javax.swing.JButton();
+        jPanel2 = new javax.swing.JPanel();
+        jSliderThresould = new javax.swing.JSlider();
+        jLabelThreshold = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
         jButtonPrevious = new javax.swing.JButton();
         jButtonNext = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable_sound = new javax.swing.JTable();
-        jButtonUpdateSoundListe = new javax.swing.JButton();
         jButtonPlay = new javax.swing.JButton();
         jButtonPause = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -286,6 +310,8 @@ public class FrmHauptfenster extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Das klingende Bild");
+        setBackground(new java.awt.Color(255, 255, 255));
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 
         jTable_images.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -312,41 +338,42 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         jScrollPane1.setViewportView(jTable_images);
         jTable_images.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
         jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jPanel1.setForeground(new java.awt.Color(255, 255, 255));
 
-        jLabel1.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jLabel1.setText("Sound Dateiname");
+        jTextFieldSoundName.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder(""), "Sounddatei Name"));
 
         jLabel3.setText("0");
 
-        jLabel4.setText("100");
+        jLabel4.setText("5000");
 
-        jLabSliderValue.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabSliderValue.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabSliderValue.setText("50");
 
+        jSliderVolume.setBackground(new java.awt.Color(255, 255, 255));
+        jSliderVolume.setMaximum(5000);
         jSliderVolume.setMinorTickSpacing(10);
         jSliderVolume.setPaintTicks(true);
+        jSliderVolume.setValue(1000);
+        jSliderVolume.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder(""), "Volume"));
         jSliderVolume.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             public void mouseMoved(java.awt.event.MouseEvent evt) {
                 jSliderVolumeMouseMoved(evt);
             }
         });
 
-        jLabel2.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jLabel2.setText("Volume");
-
-        jLabel5.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jLabel5.setText("Frequency");
-
-        jLabFrequency.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabFrequency.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabFrequency.setText("44100");
 
         jLabel7.setText("0");
 
+        jSliderFrequency.setBackground(new java.awt.Color(255, 255, 255));
         jSliderFrequency.setMaximum(88200);
         jSliderFrequency.setMinorTickSpacing(10000);
         jSliderFrequency.setPaintTicks(true);
         jSliderFrequency.setValue(44100);
+        jSliderFrequency.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder(""), "Frequency"));
         jSliderFrequency.setExtent(100);
         jSliderFrequency.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             public void mouseMoved(java.awt.event.MouseEvent evt) {
@@ -356,16 +383,15 @@ public class FrmHauptfenster extends javax.swing.JFrame {
 
         jLabel8.setText("88200");
 
-        jLabSamples.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabSamples.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabSamples.setText("128");
 
-        jLabel6.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jLabel6.setText("Samples");
-
+        jSliderSamples.setBackground(new java.awt.Color(255, 255, 255));
         jSliderSamples.setMaximum(2048);
         jSliderSamples.setMinimum(128);
         jSliderSamples.setMinorTickSpacing(200);
         jSliderSamples.setPaintTicks(true);
+        jSliderSamples.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder(""), "Samples"));
         jSliderSamples.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             public void mouseMoved(java.awt.event.MouseEvent evt) {
                 jSliderSamplesMouseMoved(evt);
@@ -376,6 +402,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
 
         jLabel10.setText("2048");
 
+        jRadioButtonInvers.setBackground(new java.awt.Color(255, 255, 255));
         jRadioButtonInvers.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jRadioButtonInversActionPerformed(evt);
@@ -383,25 +410,78 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         });
 
         jTextFieldPixelInvers.setText("Pixel nicht invertiert");
+        jTextFieldPixelInvers.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         jButtonGenerate.setText("Generate");
+        jButtonGenerate.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jButtonGenerate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonGenerateActionPerformed(evt);
             }
         });
 
-        jComboBoxAlgorithmus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "LR_SCAN", "LR_SCAN_NO_THRESHOLD", "UD_SCAN", "UD_SCAN_NO_THRESHOLD", "TRIPLET", "TRIPLET_JMP", "UD_LR_SCAN" }));
+        jComboBoxAlgorithmus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "LR_Scan", "LR_Scan no threshold", "UD_Scan", "UD_Scan no threshold", "Triplet", "Triplet with Jump", "UD_LR_Scan" }));
+        jComboBoxAlgorithmus.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jComboBoxAlgorithmus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxAlgorithmusActionPerformed(evt);
+            }
+        });
 
-        jLabelAlgorithmus.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabelAlgorithmus.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabelAlgorithmus.setText("Algorithmus");
 
         jButtonAlgoInfo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/wieklingteinbild/icons/Fragezeichen_24.png"))); // NOI18N
+        jButtonAlgoInfo.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jButtonAlgoInfo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonAlgoInfoActionPerformed(evt);
             }
         });
+
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
+
+        jSliderThresould.setMaximum(255);
+        jSliderThresould.setPaintTicks(true);
+        jSliderThresould.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder(""), "Threshold"));
+        jSliderThresould.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseMoved(java.awt.event.MouseEvent evt) {
+                jSliderThresouldMouseMoved(evt);
+            }
+        });
+
+        jLabelThreshold.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
+        jLabelThreshold.setText("0");
+
+        jLabel2.setText("255");
+
+        jLabel1.setText("0");
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jSliderThresould, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel2))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jLabelThreshold, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addComponent(jLabelThreshold, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSliderThresould, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel2))
+                .addGap(0, 11, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -410,104 +490,100 @@ public class FrmHauptfenster extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jTextFieldSoundName)
                     .addComponent(jButtonGenerate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSliderFrequency, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSliderSamples, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel9)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel10))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabSamples))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel7)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel8))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabFrequency))
-                    .addComponent(jSliderVolume, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel4))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabSliderValue))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addComponent(jComboBoxAlgorithmus, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButtonAlgoInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jLabel1)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jRadioButtonInvers)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTextFieldPixelInvers, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jLabelAlgorithmus))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addComponent(jLabel9)
+                                .addGap(179, 179, 179)
+                                .addComponent(jLabel10))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(jLabSamples)))
+                        .addGap(12, 12, 12))
+                    .addComponent(jSliderFrequency, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jSliderVolume, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                    .addComponent(jComboBoxAlgorithmus, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(jButtonAlgoInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jLabelAlgorithmus))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel7)
+                                .addGap(173, 173, 173)
+                                .addComponent(jLabel8))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addGap(179, 179, 179)
+                                .addComponent(jLabel4)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabFrequency, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabSliderValue, javax.swing.GroupLayout.Alignment.TRAILING)))
+                    .addComponent(jSliderSamples, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jRadioButtonInvers)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextFieldPixelInvers)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jTextFieldSoundName, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(25, 25, 25)
+                .addGap(53, 53, 53)
                 .addComponent(jLabelAlgorithmus)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jComboBoxAlgorithmus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonAlgoInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(50, 50, 50)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabSliderValue))
+                .addGap(37, 37, 37)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(148, 148, 148)
+                .addComponent(jLabSliderValue)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSliderVolume, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(1, 1, 1)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(jLabel4))
-                .addGap(50, 50, 50)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5)
-                    .addComponent(jLabFrequency))
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel3))
                 .addGap(18, 18, 18)
+                .addComponent(jLabFrequency)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSliderFrequency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel7)
-                    .addComponent(jLabel8))
-                .addGap(50, 50, 50)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel6)
-                    .addComponent(jLabSamples))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSliderSamples, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel9)
-                    .addComponent(jLabel10))
-                .addGap(50, 50, 50)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jRadioButtonInvers, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jTextFieldPixelInvers, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(80, 80, 80)
+                    .addComponent(jLabel8)
+                    .addComponent(jLabel7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jTextFieldPixelInvers, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabSamples)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSliderSamples, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel10)
+                            .addComponent(jLabel9))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jRadioButtonInvers, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(18, 18, 18)
                 .addComponent(jButtonGenerate, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
         jButtonPrevious.setIcon(new javax.swing.ImageIcon(getClass().getResource("/wieklingteinbild/icons/Previous-32.png"))); // NOI18N
         jButtonPrevious.setText("Previous");
+        jButtonPrevious.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jButtonPrevious.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonPreviousActionPerformed(evt);
@@ -516,6 +592,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
 
         jButtonNext.setIcon(new javax.swing.ImageIcon(getClass().getResource("/wieklingteinbild/icons/Next-32.png"))); // NOI18N
         jButtonNext.setText("Next");
+        jButtonNext.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jButtonNext.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonNextActionPerformed(evt);
@@ -532,15 +609,8 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         ));
         jScrollPane2.setViewportView(jTable_sound);
 
-        jButtonUpdateSoundListe.setIcon(new javax.swing.ImageIcon(getClass().getResource("/wieklingteinbild/icons/update_32.png"))); // NOI18N
-        jButtonUpdateSoundListe.setText("Update");
-        jButtonUpdateSoundListe.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonUpdateSoundListeActionPerformed(evt);
-            }
-        });
-
         jButtonPlay.setText("Play");
+        jButtonPlay.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jButtonPlay.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonPlayActionPerformed(evt);
@@ -548,6 +618,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         });
 
         jButtonPause.setText("Stop");
+        jButtonPause.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jButtonPause.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonPauseActionPerformed(evt);
@@ -574,33 +645,25 @@ public class FrmHauptfenster extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 295, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButtonPrevious, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 39, Short.MAX_VALUE)
                         .addComponent(jButtonNext, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jButtonUpdateSoundListe, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jButtonPause, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
-                            .addComponent(jButtonPlay, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE))))
+                    .addComponent(jButtonPlay, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButtonPause, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel_image, javax.swing.GroupLayout.DEFAULT_SIZE, 729, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel_image, javax.swing.GroupLayout.DEFAULT_SIZE, 687, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel_image, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 49, Short.MAX_VALUE)))
+                .addComponent(jLabel_image, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(38, 38, 38))
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -611,12 +674,13 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 343, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButtonUpdateSoundListe, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonPlay, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jButtonPlay, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(1, 1, 1)
                 .addComponent(jButtonPause, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 16, Short.MAX_VALUE))
+                .addGap(0, 0, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -648,25 +712,31 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     }//GEN-LAST:event_jSliderSamplesMouseMoved
 
     private void jButtonPlayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPlayActionPerformed
+        final SwingWorker worker = new SwingWorker(){           //Multi-Threading for computationally intensive Action in generateSound()
+            @Override
+            protected Object doInBackground() throws Exception {
+                if (playButtonControl() == true) {
 
-        if (playButtonControl() == true) {
-
-            TableModel model = jTable_sound.getModel();
-            String soundName = model.getValueAt(jTable_sound.getSelectedRow(), 0).toString();
-            File datei = new File(SoundDirectory.getSoundDir() + "\\" + soundName);
-            try {
-                audioClip = Applet.newAudioClip(datei.toURL());
-                audioClip.play();
-            } catch (MalformedURLException ex) {
-                Logger.getLogger(FrmHauptfenster.class.getName()).log(Level.SEVERE, null, ex);
+                    TableModel model = jTable_sound.getModel();
+                    String soundName = model.getValueAt(jTable_sound.getSelectedRow(), 0).toString();
+                    File datei = new File(SoundDirectory.getSoundDir() + "\\" + soundName);
+                    try {
+                        audioClip = Applet.newAudioClip(datei.toURL());
+                        audioClip.play();
+                    } catch (MalformedURLException ex) {
+                        Logger.getLogger(FrmHauptfenster.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Please select a sound!", "Alert", 2);
+                }
+            return 0;
             }
-        } else {
-            JOptionPane.showMessageDialog(null, "Please select a sound!", "Alert", 2);
-        }
+         };
+        worker.execute();
     }//GEN-LAST:event_jButtonPlayActionPerformed
 
     private void jButtonNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNextActionPerformed
-
+       
         if (pictureListe.isEmpty()) {
             System.exit(0);
         } else {
@@ -689,12 +759,6 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButtonPreviousActionPerformed
 
-    private void jButtonUpdateSoundListeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonUpdateSoundListeActionPerformed
-        clearSoundTable();
-        soundListe.clear();
-        addSoundName();
-    }//GEN-LAST:event_jButtonUpdateSoundListeActionPerformed
-
     private void jRadioButtonInversActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonInversActionPerformed
         setRadioButton();
         if (setRadioButton() == true) {
@@ -707,23 +771,26 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     }//GEN-LAST:event_jRadioButtonInversActionPerformed
 
     private void jButtonGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGenerateActionPerformed
-
-        if(Check.checkWavType(jTextFieldSoundName.getText()) == true){
-        if (generateButtonControl() == true) {
-            if (jTextFieldSoundName.getText().equals("")) {
-                JOptionPane.showMessageDialog(null, "Please type in Soundname!", "Alert", 2);
-            } else {
-                setAlgorithmus();
-                generateSound();
-            }
-        } else {
-            JOptionPane.showMessageDialog(null, "Please select a picture!", "Alert", 2);
-        }
-        }else{
-            JOptionPane.showMessageDialog(null, "Sound name .wav!", "Alert", 2);
-        }
-        System.out.println(advSettings4);
-        System.out.println(selectedAlgorithmus);
+        
+        final SwingWorker worker = new SwingWorker(){           //Multi-Threading for computationally intensive Action in generateSound()
+            @Override
+            protected Object doInBackground() throws Exception {
+                 if (generateButtonControl() == true) {
+                     if (jTextFieldSoundName.getText().equals("")) {
+                         JOptionPane.showMessageDialog(null, "Please type in Soundname!", "Alert", 2);
+                     } else {
+                         setAlgorithmus();
+                         generateSound();
+                     }
+                 } else {
+                     JOptionPane.showMessageDialog(null, "Please select a picture!", "Alert", 2);
+                 }
+                 System.out.println(advSettings4);
+                 System.out.println(selectedAlgorithmus);
+                 return 0;
+            }    
+        };
+        worker.execute();
     }//GEN-LAST:event_jButtonGenerateActionPerformed
 
     private void jButtonAlgoInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAlgoInfoActionPerformed
@@ -734,6 +801,15 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     private void jButtonPauseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPauseActionPerformed
         audioClip.stop();
     }//GEN-LAST:event_jButtonPauseActionPerformed
+
+    private void jComboBoxAlgorithmusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxAlgorithmusActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jComboBoxAlgorithmusActionPerformed
+
+    private void jSliderThresouldMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jSliderThresouldMouseMoved
+        // TODO add your handling code here:
+        jLabelThreshold.setText(String.valueOf(jSliderThresould.getValue()));
+    }//GEN-LAST:event_jSliderThresouldMouseMoved
 
     /**
      * @param args the command line arguments
@@ -780,7 +856,6 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     private javax.swing.JButton jButtonPause;
     private javax.swing.JButton jButtonPlay;
     private javax.swing.JButton jButtonPrevious;
-    private javax.swing.JButton jButtonUpdateSoundListe;
     private javax.swing.JComboBox<String> jComboBoxAlgorithmus;
     private javax.swing.JLabel jLabFrequency;
     private javax.swing.JLabel jLabSamples;
@@ -790,22 +865,23 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabelAlgorithmus;
+    private javax.swing.JLabel jLabelThreshold;
     private javax.swing.JLabel jLabel_image;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenu jMenuFile;
     private javax.swing.JMenuItem jMenuItemExit;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JRadioButton jRadioButtonInvers;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSlider jSliderFrequency;
     private javax.swing.JSlider jSliderSamples;
+    private javax.swing.JSlider jSliderThresould;
     private javax.swing.JSlider jSliderVolume;
     private javax.swing.JTable jTable_images;
     private javax.swing.JTable jTable_sound;
