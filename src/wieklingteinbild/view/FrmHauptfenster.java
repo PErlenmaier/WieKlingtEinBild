@@ -13,6 +13,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -23,10 +28,13 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import wieklingteinbild.controller.Check;
 import wieklingteinbild.controller.PictureDirectory;
+import static wieklingteinbild.controller.PictureDirectory.addPicturesFromDir;
+import static wieklingteinbild.controller.PictureDirectory.updatePictureDir;
 import wieklingteinbild.controller.SoundDirectory;
 import wieklingteinbild.model.Picture;
 import static wieklingteinbild.model.PictureListe.pictureListe;
@@ -42,6 +50,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     String advSettings2;
     String advSettings3;
     String advSettings4 = "0";
+    String advSetting5 = "0";
     private AudioClip audioClip;
     
     private String algoInfoMessage = "";
@@ -82,7 +91,6 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         Image picture = ImageIO.read(new File(PictureDirectory.getPictureDir() + imageName));
         Image newpic = picture.getScaledInstance(jLabel_image.getWidth(), jLabel_image.getHeight(), Image.SCALE_SMOOTH);
         jLabel_image.setIcon(new ImageIcon(newpic));
-
     }
 
     public int nextORpreviousPicture(int i) {
@@ -156,6 +164,9 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         
         int threshold = jSliderThresould.getValue();
         String stringThreshold = Integer.toString(threshold);
+        
+        int tripletJump = jSliderTripletJumpSize.getValue();
+        String stringTripletJump = Integer.toString(tripletJump);
 
         String wavName = jTextFieldSoundName.getText();
         if (wavName.isEmpty()) {
@@ -178,7 +189,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                     stringVolume,
                     stringSamples,
                     Integer.toString(selectedAlgorithmus),
-                    stringFreq, stringThreshold, "5",
+                    stringFreq, stringThreshold, stringTripletJump,
                     advSettings4);
             System.out.println(pb.redirectInput());
             final Process p =  pb.start();
@@ -231,27 +242,27 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         algoInfoMessage ="";
         String selectedAlgo = jComboBoxAlgorithmus.getSelectedItem().toString();
         
-        if(selectedAlgo.equals("LR_SCAN")){
+        if(selectedAlgo.equals("LR_Scan")){
             selectedAlgorithmus = 0;
             algoInfoMessage = beschreibungLR_SCAN;
-        }else if(selectedAlgo.equals("LR_SCAN_NO_THRESHOLD")){
+        }else if(selectedAlgo.equals("LR_Scan no threshold")){
             selectedAlgorithmus = 1;
             algoInfoMessage = beschreibungLR_SCAN_NO_THRESHOLD;
-        }else if(selectedAlgo.equals("TRIPLET")){
+        }else if(selectedAlgo.equals("Triplet")){
             selectedAlgorithmus = 4;
             
             algoInfoMessage = beschreibungTRIPLET;
-        }else if(selectedAlgo.equals("TRIPLET_JMP")){
+        }else if(selectedAlgo.equals("Triplet with Jump")){
             selectedAlgorithmus = 5;
             algoInfoMessage = beschreibungTRIPLET_JMP;
-        }else if(selectedAlgo.equals("UD_LR_SCAN")){
+        }else if(selectedAlgo.equals("UD_LR_Scan")){
             selectedAlgorithmus = 6;
             algoInfoMessage = beschreibungUD_LR_SCAN;
-        }else if(selectedAlgo.equals("UD_SCAN")){
+        }else if(selectedAlgo.equals("UD_Scan")){
             selectedAlgorithmus = 2;
             
             algoInfoMessage = beschreibungUD_SCAN;
-        }else if(selectedAlgo.equals("UD_SCAN_NO_THRESHOLD")){
+        }else if(selectedAlgo.equals("UD_Scan no threshold")){
             selectedAlgorithmus = 3;
             algoInfoMessage = beschreibungUD_SCAN_NO_THRESHOLD;
         }else{
@@ -298,6 +309,10 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         jLabelThreshold = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
+        jSliderTripletJumpSize = new javax.swing.JSlider();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabelTripletJump = new javax.swing.JLabel();
         jButtonPrevious = new javax.swing.JButton();
         jButtonNext = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -307,6 +322,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenuFile = new javax.swing.JMenu();
         jMenuItemExit = new javax.swing.JMenuItem();
+        AddPicture = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Das klingende Bild");
@@ -349,7 +365,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         jLabel4.setText("5000");
 
         jLabSliderValue.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
-        jLabSliderValue.setText("50");
+        jLabSliderValue.setText("1000");
 
         jSliderVolume.setBackground(new java.awt.Color(255, 255, 255));
         jSliderVolume.setMaximum(5000);
@@ -432,7 +448,6 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         jLabelAlgorithmus.setText("Algorithmus");
 
         jButtonAlgoInfo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/wieklingteinbild/icons/Fragezeichen_24.png"))); // NOI18N
-        jButtonAlgoInfo.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jButtonAlgoInfo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonAlgoInfoActionPerformed(evt);
@@ -441,6 +456,8 @@ public class FrmHauptfenster extends javax.swing.JFrame {
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
+        jSliderThresould.setBackground(new java.awt.Color(255, 255, 255));
+        jSliderThresould.setForeground(new java.awt.Color(255, 255, 255));
         jSliderThresould.setMaximum(255);
         jSliderThresould.setPaintTicks(true);
         jSliderThresould.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder(""), "Threshold"));
@@ -451,7 +468,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         });
 
         jLabelThreshold.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
-        jLabelThreshold.setText("0");
+        jLabelThreshold.setText("50");
 
         jLabel2.setText("255");
 
@@ -468,14 +485,14 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                 .addComponent(jLabel2))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jLabelThreshold, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jLabelThreshold))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addComponent(jLabelThreshold, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSliderThresould, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jSliderThresould, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
@@ -483,17 +500,36 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                 .addGap(0, 11, Short.MAX_VALUE))
         );
 
+        jSliderTripletJumpSize.setBackground(new java.awt.Color(255, 255, 255));
+        jSliderTripletJumpSize.setForeground(new java.awt.Color(255, 255, 255));
+        jSliderTripletJumpSize.setMaximum(255);
+        jSliderTripletJumpSize.setPaintTicks(true);
+        jSliderTripletJumpSize.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder(""), "Triplet jump size"));
+        jSliderTripletJumpSize.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseMoved(java.awt.event.MouseEvent evt) {
+                jSliderTripletJumpSizeMouseMoved(evt);
+            }
+        });
+
+        jLabel5.setText("0");
+
+        jLabel6.setText("255");
+
+        jLabelTripletJump.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
+        jLabelTripletJump.setText("50");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jTextFieldSoundName)
-                    .addComponent(jButtonGenerate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabelTripletJump)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jTextFieldSoundName, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButtonGenerate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLabel9)
@@ -503,9 +539,14 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                                 .addGap(0, 0, Short.MAX_VALUE)
                                 .addComponent(jLabSamples)))
                         .addGap(12, 12, 12))
-                    .addComponent(jSliderFrequency, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSliderVolume, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addComponent(jSliderFrequency, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jSliderVolume, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jSliderSamples, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(jRadioButtonInvers)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextFieldPixelInvers))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
@@ -522,16 +563,13 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                                 .addGap(179, 179, 179)
                                 .addComponent(jLabel4)))
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabFrequency, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabSliderValue, javax.swing.GroupLayout.Alignment.TRAILING)))
-                    .addComponent(jSliderSamples, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabFrequency)
+                    .addComponent(jSliderTripletJumpSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jRadioButtonInvers)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextFieldPixelInvers)))
+                        .addComponent(jLabel5)
+                        .addGap(197, 197, 197)
+                        .addComponent(jLabel6))
+                    .addComponent(jLabSliderValue))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -547,7 +585,15 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                     .addComponent(jButtonAlgoInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(37, 37, 37)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(148, 148, 148)
+                .addGap(26, 26, 26)
+                .addComponent(jLabelTripletJump, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSliderTripletJumpSize, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(7, 7, 7)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(jLabel6))
+                .addGap(11, 11, 11)
                 .addComponent(jLabSliderValue)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSliderVolume, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -635,6 +681,15 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         });
         jMenuFile.add(jMenuItemExit);
 
+        AddPicture.setText("Add Picture");
+        AddPicture.setActionCommand("AddPicture");
+        AddPicture.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                AddPictureActionPerformed(evt);
+            }
+        });
+        jMenuFile.add(AddPicture);
+
         jMenuBar1.add(jMenuFile);
 
         setJMenuBar(jMenuBar1);
@@ -645,19 +700,21 @@ public class FrmHauptfenster extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButtonPrevious, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 39, Short.MAX_VALUE)
-                        .addComponent(jButtonNext, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jButtonPlay, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButtonPause, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel_image, javax.swing.GroupLayout.DEFAULT_SIZE, 687, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButtonPlay, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 65, Short.MAX_VALUE)
+                        .addComponent(jButtonPause, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButtonPrevious, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButtonNext, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(5, 5, 5)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel_image, javax.swing.GroupLayout.DEFAULT_SIZE, 822, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -671,16 +728,16 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonNext, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonPrevious, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 66, Short.MAX_VALUE)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 343, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButtonPlay, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(1, 1, 1)
-                .addComponent(jButtonPause, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonPlay, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonPause, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 0, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(29, Short.MAX_VALUE))
         );
 
         pack();
@@ -729,10 +786,14 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                 } else {
                     JOptionPane.showMessageDialog(null, "Please select a sound!", "Alert", 2);
                 }
+                
             return 0;
+            
             }
          };
+        
         worker.execute();
+        
     }//GEN-LAST:event_jButtonPlayActionPerformed
 
     private void jButtonNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNextActionPerformed
@@ -789,8 +850,10 @@ public class FrmHauptfenster extends javax.swing.JFrame {
                  System.out.println(selectedAlgorithmus);
                  return 0;
             }    
+
         };
         worker.execute();
+
     }//GEN-LAST:event_jButtonGenerateActionPerformed
 
     private void jButtonAlgoInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAlgoInfoActionPerformed
@@ -810,6 +873,54 @@ public class FrmHauptfenster extends javax.swing.JFrame {
         // TODO add your handling code here:
         jLabelThreshold.setText(String.valueOf(jSliderThresould.getValue()));
     }//GEN-LAST:event_jSliderThresouldMouseMoved
+
+    private void AddPictureActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddPictureActionPerformed
+
+        final SwingWorker worker = new SwingWorker(){           //Multi-Threading for computationally intensive Action in generateSound()
+           @Override
+           protected Object doInBackground() throws Exception {
+
+                JFileChooser file = new JFileChooser();
+                file.setCurrentDirectory(new File(System.getProperty("user.home")));
+                //filter the files
+                FileNameExtensionFilter filter = new FileNameExtensionFilter("*.bmp","bmp");
+                file.addChoosableFileFilter(filter);
+                int result = file.showSaveDialog(null);
+                 //if the user click on save in Jfilechooser
+                if(result == JFileChooser.APPROVE_OPTION){
+                    try {
+                        System.out.println("hallo");
+                        File selectedFile = file.getSelectedFile();
+                        File destinationFile = new File(selectedFile.getName());
+                        Path source = selectedFile.toPath();
+                        Path destination = destinationFile.toPath();
+                        Files.copy(source, destination,StandardCopyOption.REPLACE_EXISTING);
+                    } catch (IOException ex) {
+                        Logger.getLogger(FrmHauptfenster.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                 //if the user click on save in Jfilechooser
+                else if(result == JFileChooser.CANCEL_OPTION){
+                    System.out.println("No File Select");
+                }
+            return 0;
+            }
+            @Override
+            protected void done() {
+                clearTable();
+                pictureListe.clear();
+                updatePictureDir();
+               addImagesName();
+                    
+             }
+        };
+        worker.execute();
+    }//GEN-LAST:event_AddPictureActionPerformed
+
+    private void jSliderTripletJumpSizeMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jSliderTripletJumpSizeMouseMoved
+
+        jLabelTripletJump.setText(String.valueOf(jSliderTripletJumpSize.getValue()));
+    }//GEN-LAST:event_jSliderTripletJumpSizeMouseMoved
 
     /**
      * @param args the command line arguments
@@ -850,6 +961,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem AddPicture;
     private javax.swing.JButton jButtonAlgoInfo;
     private javax.swing.JButton jButtonGenerate;
     private javax.swing.JButton jButtonNext;
@@ -865,11 +977,14 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabelAlgorithmus;
     private javax.swing.JLabel jLabelThreshold;
+    private javax.swing.JLabel jLabelTripletJump;
     private javax.swing.JLabel jLabel_image;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenu jMenuFile;
@@ -882,6 +997,7 @@ public class FrmHauptfenster extends javax.swing.JFrame {
     private javax.swing.JSlider jSliderFrequency;
     private javax.swing.JSlider jSliderSamples;
     private javax.swing.JSlider jSliderThresould;
+    private javax.swing.JSlider jSliderTripletJumpSize;
     private javax.swing.JSlider jSliderVolume;
     private javax.swing.JTable jTable_images;
     private javax.swing.JTable jTable_sound;

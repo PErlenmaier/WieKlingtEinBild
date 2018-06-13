@@ -31,12 +31,13 @@ public class WieKlingtEinBild {
                 }
         PictureDirectory.updatePictureDir();
         SoundDirectory.updateSoundDir();
-        EventQueue.invokeLater(() -> { // Lambda Expression for the Annonymous functions no need of Params.
+        EventQueue.invokeLater((new Runnable() {
+               @Override
+               public void run() {
                 FrmHauptfenster frmHauptfenster = new FrmHauptfenster();
                 frmHauptfenster.setVisible(true);
-                
-           } 
-           );
+               }
+           }));    
     }
 
 }

@@ -33,7 +33,8 @@ public class SoundDirectory {
         
         String path = System.getProperty("user.dir");
         System.out.println(path);
-        String dirPath = path + "\\src\\wieklingteinbild\\Algorithmus\\Programm\\";
+       // String dirPath = path + "\\src\\wieklingteinbild\\Algorithmus\\Programm\\";
+        String dirPath = path;
         System.out.println(dirPath);
         setSoundDir(dirPath);
     }

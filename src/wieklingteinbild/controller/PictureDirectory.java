@@ -6,6 +6,8 @@
 package wieklingteinbild.controller;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import wieklingteinbild.model.Picture;
@@ -31,12 +33,13 @@ public class PictureDirectory {
         
         String path = System.getProperty("user.dir");
         System.out.println(path);
-        String dirPath = path + "\\src\\wieklingteinbild\\Algorithmus\\Programm\\";
+       // String dirPath = path + "\\src\\wieklingteinbild\\Algorithmus\\Programm\\";
+        String dirPath = path + "\\";
         System.out.println(dirPath);
         setPictureDir(dirPath);
     }
     
-        public void addPicturesFromDir() {
+        public static void addPicturesFromDir() {
         String dir = getPictureDir();
         File file = new File(dir);
         Object[] files = file.list();
