@@ -29,9 +29,9 @@ int main(int argc, char* argv[])
 	 *******************/
 
 	 /****Settings2*******
-	 * LR_SCAN: Aktivierungsschwelle für Pixel
+	 * LR_SCAN: Aktivierungsschwelle fuer Pixel
 	 * LR_SCAN_NO_THRESHOLD: -
-	 * UD_SCAN: Aktivierungsschwelle für Pixel
+	 * UD_SCAN: Aktivierungsschwelle fuer Pixel
 	 * UD_SCAN_NO_THRESHOLD: - 
 	 * TRIPLET: Tondauer abhaengig von dem Blauanteil (0-255)
 	 * TRIPLET_JMP: - 
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 	 * LR_SCAN_NO_THRESHOLD: - 
 	 * UD_SCAN: - 
 	 * UD_SCAN_NO_THRESHOLD: - 
-	 * TRIPLET: Anzahl der Triplets die man pro Frequenz überspringen soll
+	 * TRIPLET: Anzahl der Triplets die man pro Frequenz ueberspringen soll
 	 * TRIPLET_JMP: -
 	 * UD_LR_SCAN: -
 	 *******************/
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
 	std::cout << "Bild Dateiname: " << imageName << std::endl;
 	//sounddatei Name
 	std::string soundName = argv[2];
-	std::cout << "Audio Dateiname: " << imageName << std::endl;
+	std::cout << "Audio Dateiname: " << soundName << std::endl;
 
 	//Grundeinstellungen fuer Tonerzeugung
 	Processing::ProcessingSettings processingSettings;

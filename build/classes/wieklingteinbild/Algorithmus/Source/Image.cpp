@@ -28,12 +28,12 @@ void Image::readHeader()
 
 void Image::readImageData()
 {
-	//Speicher befuellen
+	//Genug freien speicher erhalten
 	bitmapData.resize(bitmapInfoHeader.biHeight);
-
 	for (auto& y : bitmapData)
 		y.resize(bitmapInfoHeader.biWidth);
 
+	//Bilddaten einlesen
 	for (auto& y : bitmapData)
 		for (auto& x : y)
 			file.read(reinterpret_cast<char*>(&(x)), 3);

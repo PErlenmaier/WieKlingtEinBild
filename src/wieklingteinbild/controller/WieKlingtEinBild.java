@@ -5,22 +5,38 @@
  */
 package wieklingteinbild.controller;
 
+import java.awt.Color;
+import java.awt.EventQueue;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import wieklingteinbild.view.FrmHauptfenster;
 
 /**
  *
- * @author Philipp
+ * @author Philipp // Max
  */
 public class WieKlingtEinBild {
 
     /**
-     * @param args the command line arguments
+     * @param args nothing to give
      */
+    
     public static void main(String[] args) {
+           try
+                {
+                    UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
+                }
+           catch(ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e)
+                {
+                }
         PictureDirectory.updatePictureDir();
         SoundDirectory.updateSoundDir();
-        FrmHauptfenster frmHauptfenster = new FrmHauptfenster();
-        frmHauptfenster.setVisible(true);
+        EventQueue.invokeLater(() -> { // Lambda Expression for the Annonymous functions no need of Params.
+                FrmHauptfenster frmHauptfenster = new FrmHauptfenster();
+                frmHauptfenster.setVisible(true);
+                
+           } 
+           );
     }
 
 }

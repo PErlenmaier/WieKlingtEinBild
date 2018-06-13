@@ -1,10 +1,10 @@
 #include "Processing.h"
-#define DEBUG
-#ifdef DEBUG
+#define PRINT_PROGRESS
+#ifdef PRINT_PROGRESS
 #include <iostream>
 #endif
 
-#ifdef DEBUG
+#ifdef PRINT_PROGRESS
 void printProgress(int x, int xMax)
 {
 	if (!(x % 8))
@@ -14,7 +14,7 @@ void printProgress(int x, int xMax)
 
 /*AdditionalSettings
  *Settings1: Maximale Frequenz
- *Settings2: Aktivierungsschwelle für Pixel
+ *Settings2: Aktivierungsschwelle fuer Pixel
  *Settings4: Wenn != 0, dann werden die Pixel invertiert betrachtet
  */
 void Processing::Processing::lrScan(const AdditionalSettings& additionalSettings)
@@ -24,10 +24,10 @@ void Processing::Processing::lrScan(const AdditionalSettings& additionalSettings
 	const auto freqPerRow = static_cast<const int>(round(additionalSettings.settings1 / height));
 	auto volume = 0.0;
 
-	for (auto x = 0; x < width; ++x)
+	for (auto x = decltype(width){0}; x < width; ++x)
 	{
 		//Frequenz fuer jeden Pixel berechnen
-		for (auto y = 0; y < height; ++y)
+		for (auto y = decltype(height){0}; y < height; ++y)
 		{
 			const auto& pixel = image->getPixel(y, x);
 
@@ -45,14 +45,14 @@ void Processing::Processing::lrScan(const AdditionalSettings& additionalSettings
 			}
 
 			//Aktivierungsschwelle
-			if (volume > additionalSettings.settings2)
+			if (volume < additionalSettings.settings2)
 				volume = 0;
 			else
 				volume /= height;
 
 			//Frequenz ist abhaengig von der derzeitigen Zeile
 			const auto frequency = y * freqPerRow;
-			//Frequenz zum Soundbuffer hinzufügen
+			//Frequenz zum Soundbuffer hinzufuegen
 			sound->addFrequency(volume, frequency);
 		}
 		//Die Daten aus dem Soundbuffer in die .wav Datei schreiben
@@ -63,7 +63,7 @@ void Processing::Processing::lrScan(const AdditionalSettings& additionalSettings
 		sound->resetBuffer();
 
 		//Statusausgabe
-#ifdef DEBUG
+#ifdef PRINT_PROGRESS
 		printProgress(x, width);
 #endif
 	}
@@ -80,10 +80,10 @@ void Processing::Processing::lrScan_no_threshold(const AdditionalSettings& addit
 	const auto height = image->getHeight();
 	const auto freqPerRow = static_cast<const int>(round(additionalSettings.settings1 / height));
 	auto volume = 0.0;
-	for (auto x = 0; x < width; ++x)
+	for (auto x = decltype(width){0}; x < width; ++x)
 	{
 		//Frequenz fuer jeden Pixel berechnen
-		for (auto y = 0; y < height; ++y)
+		for (auto y = decltype(height){0}; y < height; ++y)
 		{
 			const auto& pixel = image->getPixel(y, x);
 
@@ -102,7 +102,7 @@ void Processing::Processing::lrScan_no_threshold(const AdditionalSettings& addit
 
 			//Frequenz ist abhaengig von der derzeitigen Zeile
 			const auto frequency = y * freqPerRow;
-			//Frequenz zum Soundbuffer hinzufügen
+			//Frequenz zum Soundbuffer hinzufuegen
 			sound->addFrequency(volume, frequency);
 		}
 		//Die Daten aus dem Soundbuffer in die .wav Datei schreiben
@@ -113,7 +113,7 @@ void Processing::Processing::lrScan_no_threshold(const AdditionalSettings& addit
 		sound->resetBuffer();
 
 		//Statusausgabe
-#ifdef DEBUG
+#ifdef PRINT_PROGRESS
 		printProgress(x, width);
 #endif
 	}
@@ -121,7 +121,7 @@ void Processing::Processing::lrScan_no_threshold(const AdditionalSettings& addit
 
 /*AdditionalSettings
 *Settings1: Maximale Frequenz
-*Settings2: Aktivierungsschwelle für Pixel
+*Settings2: Aktivierungsschwelle fuer Pixel
 *Settings4: Wenn != 0, dann werden die Pixel invertiert betrachtet
 */
 void Processing::Processing::udScan(const AdditionalSettings& additionalSettings)
@@ -131,10 +131,10 @@ void Processing::Processing::udScan(const AdditionalSettings& additionalSettings
 	const auto freqPerRow = static_cast<const int>(round(additionalSettings.settings1 / height));
 	auto volume = 0.0;
 
-	for (auto y = 0; y < height; ++y)
+	for (auto y = decltype(height){0}; y < height; ++y)
 	{
 		//Frequenz fuer jeden Pixel berechnen
-		for (auto x = 0; x < width; ++x)
+		for (auto x = decltype(width){0}; x < width; ++x)
 		{
 			const auto& pixel = image->getPixel(y, x);
 
@@ -158,7 +158,7 @@ void Processing::Processing::udScan(const AdditionalSettings& additionalSettings
 
 			//Frequenz ist abhaengig von der derzeitigen Zeile
 			const auto frequency = y * freqPerRow;
-			//Frequenz zum Soundbuffer hinzufügen
+			//Frequenz zum Soundbuffer hinzufuegen
 			sound->addFrequency(volume, frequency);
 		}
 		//Die Daten aus dem Soundbuffer in die .wav Datei schreiben
@@ -169,7 +169,7 @@ void Processing::Processing::udScan(const AdditionalSettings& additionalSettings
 		sound->resetBuffer();
 
 		//Statusausgabe
-#ifdef DEBUG
+#ifdef PRINT_PROGRESS
 		printProgress(y, height);
 #endif
 	}
@@ -186,10 +186,10 @@ void Processing::Processing::udScan_no_threshold(const AdditionalSettings& addit
 	const auto freqPerRow = static_cast<const int>(round(additionalSettings.settings1 / height));
 	auto volume = 0.0;
 
-	for (auto y = 0; y < height; ++y)
+	for (auto y = decltype(height){0}; y < height; ++y)
 	{
 		//Frequenz fuer jeden Pixel berechnen
-		for (auto x = 0; x < width; ++x)
+		for (auto x = decltype(width){0}; x < width; ++x)
 		{
 			const Pixel& pixel = image->getPixel(y, x);
 
@@ -208,7 +208,7 @@ void Processing::Processing::udScan_no_threshold(const AdditionalSettings& addit
 
 			//Frequenz ist abhaengig von der derzeitigen Zeile
 			const auto frequency = y * freqPerRow;
-			//Frequenz zum Soundbuffer hinzufügen
+			//Frequenz zum Soundbuffer hinzufuegen
 			sound->addFrequency(volume, frequency);
 		}
 		//Die Daten aus dem Soundbuffer in die .wav Datei schreiben
@@ -219,7 +219,7 @@ void Processing::Processing::udScan_no_threshold(const AdditionalSettings& addit
 		sound->resetBuffer();
 
 		//Statusausgabe
-#ifdef DEBUG
+#ifdef PRINT_PROGRESS
 		printProgress(y, height);
 #endif
 	}
@@ -228,7 +228,7 @@ void Processing::Processing::udScan_no_threshold(const AdditionalSettings& addit
 
 /*AdditionalSettings
 *Settings2: Tondauer abhaengig von dem Blauanteil
-*Settings3: Anzahl der Triplets die man pro Frequenz überspringen soll
+*Settings3: Anzahl der Triplets die man pro Frequenz ueberspringen soll
 *Settings4: Wenn != 0, dann werden die Pixel invertiert betrachtet
 */
 void Processing::Processing::triplet(const AdditionalSettings& additionalSettings)
@@ -240,42 +240,35 @@ void Processing::Processing::triplet(const AdditionalSettings& additionalSetting
 	uint8_t red = 0, green = 0, blue = 0;
 
 
-	for (int x = 1; x < width * height; x += 3 * additionalSettings.settings3)
+	for (auto x = decltype(width*height){1}; x < width * height; x += 3 * static_cast<decltype(x)>(additionalSettings.settings3))
 	{
 		const auto& pixel = image->getPixel(currentPos / width, currentPos % width);
-		currentPos += 3 * additionalSettings.settings3;
+		currentPos += 3 * static_cast<decltype(currentPos)>(additionalSettings.settings3);
 		currentPos %= width * height;
 
 		if(additionalSettings.settings4 != 0)
 		{
+			red = 255 - pixel.r;
+			green = 255 - pixel.g;
 			blue = 255 - pixel.b;
 		}
 		else
 		{
+			red = pixel.r;
+			green = pixel.g;
 			blue = pixel.b;
 		}
 
 		//Ton erzeugen. Tondauer abhaengig von Blauanteil
-		for (auto i = 0; i < blue; i += additionalSettings.settings2)
+		for (auto i = 0; i < blue; i += static_cast<decltype(i)>(additionalSettings.settings2))
 		{
-			if (additionalSettings.settings4 != 0)
-			{
-				red = 255 - pixel.r;
-				green = 255 - pixel.g;
-			}
-			else
-			{
-				red = pixel.r;
-				green = 255 - pixel.g;
-			}
-
 			sound->addFrequency(red, green);
 			for (auto& u : sound->getBuffer())
 				wave->writeSamples(static_cast<uint16_t>(u));
 			sound->resetBuffer();
 		}
 
-#ifdef DEBUG
+#ifdef PRINT_PROGRESS
 		printProgress(x, width);
 #endif
 	}
@@ -295,7 +288,7 @@ void Processing::Processing::triplet_jmp(const AdditionalSettings& additionalSet
 	uint8_t red = 0, green = 0, blue = 0;
 
 
-	for (auto x = 1; x < width; ++x)
+	for (auto x = decltype(width){1}; x < width; ++x)
 	{
 		const auto& pixel = image->getPixel(currentPos / width, currentPos % width);
 
@@ -321,7 +314,7 @@ void Processing::Processing::triplet_jmp(const AdditionalSettings& additionalSet
 			wave->writeSamples(static_cast<uint16_t>(i));
 
 		sound->resetBuffer();
-#ifdef DEBUG
+#ifdef PRINT_PROGRESS
 		printProgress(x, width);
 #endif
 	}
@@ -339,7 +332,8 @@ void Processing::Processing::ud_lr_scan(const AdditionalSettings& additionalSett
 	const auto maxColorWidth = width * 255;
 	const auto maxColorHeight = height * 255;
 
-	auto xLR = 0, yUD = 0;
+	auto xLR = decltype(width){0};
+	auto yUD = decltype(height){0};
 	for (auto done = false; done != true;)
 	{
 		done = true;
@@ -367,15 +361,13 @@ void Processing::Processing::ud_lr_scan(const AdditionalSettings& additionalSett
 		//Derzeitige Zeile durchscannen
 		if (additionalSettings.settings4 != 0)
 		{
-			for (auto xUD = 0; xUD < width; ++xUD)
+			for (auto xUD = decltype(width){0}; xUD < width; ++xUD)
 				addRGBInverted(yUD, xUD);
 		}
 		else
 		{
-			for (auto xUD = 0; xUD < width; ++xUD)
-			{
+			for (auto xUD = decltype(width){0}; xUD < width; ++xUD)
 				addRGB(yUD, xUD);
-			}
 		}
 		//Rotanteil -> Frequenz ; Gruenanteil -> Amplitude
 		const auto frequencyUD = (static_cast<double>(red) * additionalSettings.settings1) / maxColorWidth;
@@ -385,20 +377,16 @@ void Processing::Processing::ud_lr_scan(const AdditionalSettings& additionalSett
 		red = 0, green = 0;
 		if (additionalSettings.settings4 != 0)
 		{
-			for (auto yLR = 0; yLR < height; ++yLR)
-			{
+			for (auto yLR = decltype(height){0}; yLR < height; ++yLR)
 				addRGBInverted(yLR, xLR);
-			}
 		}
 		else
 		{
-			for (auto yLR = 0; yLR < height; ++yLR)
-			{
+			for (auto yLR = decltype(height){0}; yLR < height; ++yLR)
 				addRGB(yLR, xLR);
-			}
 		}
 		//Rotanteil -> Frequenz ; Gruenanteil -> Amplitude
-		const auto frequencyLR = (static_cast<double>(red) * additionalSettings.settings1) / maxColorWidth;
+		const auto frequencyLR = (static_cast<double>(red) * additionalSettings.settings1) / maxColorHeight;
 		const auto volumeLR = (static_cast<double>(green)) / (maxColorWidth * 2.0);
 
 		//Laenge des Tones abhaengig vom gemeinsamen Blauanteil
@@ -430,7 +418,7 @@ void Processing::Processing::ud_lr_scan(const AdditionalSettings& additionalSett
 		}
 
 		//Statusausgabe
-#ifdef DEBUG
+#ifdef PRINT_PROGRESS
 		printProgress(xLR * yUD, height * width);
 #endif
 	}
@@ -442,7 +430,7 @@ void Processing::Processing::start(const std::string& imageFile, const std::stri
 {
 	//Objekte erzeugen und initialisieren
 	image = std::make_unique<Image>(imageFile);
-	wave = std::make_unique<Wave>(outputFile, settings.samplingFrequency);
+	wave = std::make_unique<Wave>(outputFile, static_cast<uint32_t>(settings.samplingFrequency));
 	sound = std::make_unique<Sound>(settings.samplingFrequency, settings.audioVolume, settings.samples);
 
 	switch (algorithm)
@@ -463,7 +451,7 @@ void Processing::Processing::start(const std::string& imageFile, const std::stri
 		udScan_no_threshold(additionalSettings);
 		break;
 
-		//Jeweils immer 3 Triplets einscannen, entweder gibt Blau Tondauer oder Offset zum nächsten Triplet an
+		//Jeweils immer 3 Triplets einscannen, entweder gibt Blau Tondauer oder Offset zum naechsten Triplet an
 	case ProcessingAlgorithm::TRIPLET:
 		triplet(additionalSettings);
 		break;
@@ -471,6 +459,7 @@ void Processing::Processing::start(const std::string& imageFile, const std::stri
 		triplet_jmp(additionalSettings);
 		break;
 
+		//Mischung aus LR & UD scan
 	case ProcessingAlgorithm::UD_LR_SCAN:
 		ud_lr_scan(additionalSettings);
 		break;
